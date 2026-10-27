@@ -1,0 +1,85 @@
+@startuml
+top to bottom direction
+
+skinparam backgroundColor #FFFFFF
+skinparam DefaultFontName SimSun
+skinparam DefaultFontSize 12
+skinparam ArrowFontName SimSun
+skinparam ArrowFontSize 12
+skinparam PackageFontName SimSun
+skinparam PackageFontSize 12
+skinparam RectangleFontName SimSun
+skinparam RectangleFontSize 12
+skinparam shadowing false
+skinparam packageStyle rectangle
+skinparam defaultTextAlignment center
+skinparam linetype ortho
+skinparam ArrowColor #63788d
+skinparam ArrowThickness 1.5
+skinparam RoundCorner 18
+skinparam PackageFontColor #18324d
+skinparam PackageBorderColor #3a5673
+skinparam PackageBackgroundColor #FFFFFF
+skinparam RectangleBorderColor #3a5673
+skinparam RectangleFontColor #18324d
+skinparam RectangleBackgroundColor #FFFFFF
+
+frame "感知与反馈" as SENSE #F7EFFF {
+  rectangle "激光雷达\nUART5 距离帧" as LIDAR #FFFFFF
+  rectangle "左右轮编码器\nGPT2 / GPT3 速度反馈" as ENCODER #FFFFFF
+  rectangle "电池电压采样\nADC3 模拟输入" as BAT #FFFFFF
+  rectangle "按键与旋转编码器\nGPIO / 外部中断" as KEYS #FFFFFF
+}
+
+rectangle "Jetson Nano\n视觉信息处理模块\nUART9 发送识别结果" as JETSON #D9EBFF
+
+frame "RA6M5 主控平台" as PLATFORM #EEF5FF {
+  frame "Renesas RA6M5 主控" as MCU #FFE7DD {
+    rectangle "主控 MCU\n运动控制 / 菜单显示 / 任务调度" as RA #FFF5F1
+    rectangle "通信接口\nUART9 / UART4 / UART5 / UART7" as COMM #FFF5F1
+    rectangle "反馈输入\nGPT2 / GPT3 / ADC3 / GPIO IRQ" as FEED #FFF5F1
+    rectangle "系统服务\nSPI1 + DMAC / 软件 IIC / GPT6" as SYS #FFF5F1
+    rectangle "运动输出\nGPT0 + GPIO / GPT4" as MOTION #FFF5F1
+  }
+}
+
+frame "执行层硬件" as EXEC #FFF7DE {
+  rectangle "TB6612 电机驱动" as TB6612 #FFFFFF
+  rectangle "左右驱动电机" as MOTORS #FFFFFF
+  rectangle "转向舵机" as STEER #FFFFFF
+  rectangle "机械臂 / 舵机控制板" as ARM #FFFFFF
+}
+
+frame "显示 / 存储 / 调试" as SUPPORT #EDF8EE {
+  rectangle "LCD 显示屏\nSPI1 + DMAC" as LCD #FFFFFF
+  rectangle "EEPROM 参数存储\n软件 IIC" as EEPROM #FFFFFF
+  rectangle "调试串口 / printf\nUART7" as DEBUG #FFFFFF
+  rectangle "1 ms 系统时基\nGPT6 触发 10 ms 控制节拍" as TICK #F6F7FB
+}
+
+KEYS -[hidden]down- JETSON
+JETSON -[hidden]down- RA
+MOTION -[hidden]down- TB6612
+ARM -[hidden]down- LCD
+
+RA ..> COMM
+RA ..> FEED
+RA ..> SYS
+RA ..> MOTION
+
+JETSON --> COMM : UART9\n视觉结果
+LIDAR --> COMM : 距离帧
+ENCODER --> FEED : 速度反馈
+BAT --> FEED : 电压采样
+KEYS <--> FEED : 用户输入
+
+COMM <--> ARM : UART4 控制命令
+COMM <--> DEBUG : UART7 调试日志
+SYS <--> LCD : SPI1 刷屏
+SYS <--> EEPROM : 参数读写
+SYS ..> TICK
+
+MOTION --> TB6612 : GPT0 PWM + GPIO
+TB6612 --> MOTORS
+MOTION --> STEER : GPT4 PWM
+@enduml

@@ -1,0 +1,21 @@
+; Bank1 尾部 0x0800E000..0x0800FFFF 留给双份配置，不放程序或常量。
+LR_BOOT 0x08000000 0x0000E000 {
+  ; 位置及手感监督仍在SRAM，缩小背景代码分配预算；加载区和参数页边界保持不变。
+  ; 未放入此预算的背景函数由第二程序Bank接收，原保护和程序功能全部保留。
+  ER_BOOT 0x08000000 ANY_SIZE 0x000057A0 0x000058A0 {
+    startup_stm32g474xx.o (RESET, +First)
+    *(InRoot$$Sections)
+    system_stm32g4xx.o (+RO)
+    .ANY (+RO)
+  }
+  RW_IRAM 0x20000000 0x00018000 {
+    * (.motor_fastcode)
+    .ANY (+RW +ZI)
+  }
+}
+LR_APP 0x08040000 0x00010000 {
+  ; 显式限制ANY占用，第二加载区同样保留64字节供链接器生成内容。
+  ER_APP 0x08040000 ANY_SIZE 0x0000FFC0 0x00010000 {
+    .ANY (+RO)
+  }
+}

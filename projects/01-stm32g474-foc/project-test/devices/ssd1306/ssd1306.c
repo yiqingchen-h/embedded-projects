@@ -1,0 +1,108 @@
+#include "ssd1306.h"
+#include <stddef.h>
+#include <string.h>
+
+/* 本地页缓冲：每个字节对应竖直8个像素。 */
+static uint8_t g_ssd1306_frame[8][128];
+/* 由板卡层提供总线访问，不绑定 STM32 实例。 */
+static ssd1306_write_t g_ssd1306_write;
+/* 仅在初始化写入成功后保留设备地址。 */
+static uint8_t g_ssd1306_address;
+/* 自包含的5列数字、大写字母字模，按下列字符表索引。 */
+static const uint8_t g_ssd1306_font[][5] = {
+ {0x3E,0x51,0x49,0x45,0x3E},{0,0x42,0x7F,0x40,0},{0x42,0x61,0x51,0x49,0x46},
+ {0x21,0x41,0x45,0x4B,0x31},{0x18,0x14,0x12,0x7F,0x10},{0x27,0x45,0x45,0x45,0x39},
+ {0x3C,0x4A,0x49,0x49,0x30},{1,0x71,9,5,3},{0x36,0x49,0x49,0x49,0x36},{6,0x49,0x49,0x29,0x1E},
+ {0x7E,0x11,0x11,0x11,0x7E},{0x7F,0x49,0x49,0x49,0x36},{0x3E,0x41,0x41,0x41,0x22},
+ {0x7F,0x41,0x41,0x22,0x1C},{0x7F,0x49,0x49,0x49,0x41},{0x7F,9,9,9,1},
+ {0x3E,0x41,0x49,0x49,0x7A},{0x7F,8,8,8,0x7F},{0,0x41,0x7F,0x41,0},
+ {0x20,0x40,0x41,0x3F,1},{0x7F,8,0x14,0x22,0x41},{0x7F,0x40,0x40,0x40,0x40},
+ {0x7F,2,0x0C,2,0x7F},{0x7F,4,8,0x10,0x7F},{0x3E,0x41,0x41,0x41,0x3E},
+ {0x7F,9,9,9,6},{0x3E,0x41,0x51,0x21,0x5E},{0x7F,9,0x19,0x29,0x46},
+ {0x46,0x49,0x49,0x49,0x31},{1,1,0x7F,1,1},{0x3F,0x40,0x40,0x40,0x3F},
+ {0x1F,0x20,0x40,0x20,0x1F},{0x3F,0x40,0x38,0x40,0x3F},{0x63,0x14,8,0x14,0x63},
+ {7,8,0x70,8,7},{0x61,0x51,0x49,0x45,0x43},
+ {0,0,0,0,0},{0,0x36,0x36,0,0},{8,8,8,8,8},{0x40,0x20,0x10,8,4},{2,1,0x51,9,6}
+};
+/* 与字模严格一一对应。 */
+static const char g_ssd1306_chars[] = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ :-/?";
+
+/** @brief 见 ssd1306.h。 */
+bool
+ssd1306_init(ssd1306_write_t write)
+{
+    /* SSD1306 内置电荷泵、页寻址；DBh 选择数据手册定义的20h（0.77×VCC）。 */
+    static const uint8_t init[] = {0xAE,0xD5,0x80,0xA8,0x3F,0xD3,0,0x40,0x8D,0x14,
+        0x20,2,0xA1,0xC8,0xDA,0x12,0x81,0x7F,0xD9,0xF1,0xDB,0x20,0xA4,0xA6,0x2E};
+    const uint8_t on = 0xAF;
+    g_ssd1306_write = write;
+    g_ssd1306_address = 0;
+    if (NULL == write) { return false; }
+    for (uint8_t addr = 0x3C; addr <= 0x3D; ++addr)
+    {
+        if (write(addr, 0, init, sizeof(init)))
+        {
+            g_ssd1306_address = addr;
+            ssd1306_clear();
+            if (ssd1306_refresh() && write(addr, 0, &on, 1)) { return true; }
+            g_ssd1306_address = 0;
+        }
+    }
+    return false;
+}
+
+/** @brief 见 ssd1306.h。 */
+void
+ssd1306_clear(void)
+{
+    memset(g_ssd1306_frame, 0, sizeof(g_ssd1306_frame));
+}
+
+/** @brief 见 ssd1306.h。 */
+void
+ssd1306_pattern(uint8_t pattern)
+{
+    for (uint8_t page = 0U; page < 8U; ++page)
+    {
+        for (uint8_t col = 0U; col < 128U; ++col)
+        {
+            g_ssd1306_frame[page][col] = pattern == 1U ? 0xFFU :
+                (pattern == 2U ? ((col & 1U) ? 0xAAU : 0x55U) : 0U);
+        }
+    }
+}
+
+/** @brief 见 ssd1306.h。 */
+void
+ssd1306_text(uint8_t row, const char *text)
+{
+    if (row >= 8U || NULL == text) { return; }
+    memset(g_ssd1306_frame[row], 0, 128);
+    for (uint8_t col = 0; col < 21U && text[col] != '\0'; ++col)
+    {
+        const char *match = strchr(g_ssd1306_chars, text[col]);
+        size_t index = match ? (size_t)(match - g_ssd1306_chars) : sizeof(g_ssd1306_font) / 5U - 1U;
+        memcpy(&g_ssd1306_frame[row][col * 6U], g_ssd1306_font[index], 5);
+    }
+}
+
+/** @brief 见 ssd1306.h。 */
+bool
+ssd1306_refresh(void)
+{
+    if (g_ssd1306_address == 0 || NULL == g_ssd1306_write) { return false; }
+    for (uint8_t page = 0; page < 8U; ++page)
+    {
+        uint8_t command[] = {(uint8_t)(0xB0U | page), 0, 0x10};
+        if (!g_ssd1306_write(g_ssd1306_address, 0, command, sizeof(command)) ||
+            !g_ssd1306_write(g_ssd1306_address, 0x40, g_ssd1306_frame[page], 128)) { return false; }
+    }
+    return true;
+}
+
+/** @brief 见 ssd1306.h。 */
+uint8_t
+ssd1306_address(void)
+{
+    return g_ssd1306_address;
+}

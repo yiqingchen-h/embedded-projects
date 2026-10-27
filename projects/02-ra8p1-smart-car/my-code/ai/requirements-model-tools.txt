@@ -1,0 +1,5 @@
+-r requirements.txt
+# 本地 CPU 模型调试环境版本；不替代 DirectML/QAT 的独立训练环境
+tensorflow-cpu==2.21.0
+tf2onnx==1.17.0
+onnx==1.21.0

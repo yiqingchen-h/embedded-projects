@@ -1,0 +1,14 @@
+wake
+start
+stop
+select_cube
+select_hippo
+select_cat
+select_stone_pillar
+select_capybara
+select_corn
+select_jiaotailang
+select_dog
+select_tnt
+unknown
+silence

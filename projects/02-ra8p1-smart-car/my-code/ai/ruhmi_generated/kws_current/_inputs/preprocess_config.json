@@ -1,0 +1,12 @@
+{
+  "sample_rate": 16000,
+  "duration_seconds": 1.0,
+  "sample_count": 16000,
+  "frame_length": 400,
+  "frame_step": 160,
+  "n_fft": 512,
+  "mel_bins": 40,
+  "low_hz": 20.0,
+  "high_hz": 7600.0,
+  "feature_type": "log_mel"
+}

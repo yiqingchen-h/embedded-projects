@@ -1,0 +1,27 @@
+[tool.pytest.ini_options]
+testpaths = ["src/tests"]
+pythonpath = ["src"]
+cache_dir = "checks/pytest_cache"
+
+[tool.mypy]
+python_version = "3.12"
+strict = true
+files = ["src/foc_control", "src/main.py"]
+cache_dir = "checks/mypy"
+
+[[tool.mypy.overrides]]
+module = ["pyqtgraph", "pyqtgraph.*"]
+ignore_missing_imports = true
+
+[tool.black]
+target-version = ["py312"]
+line-length = 100
+
+[tool.ruff]
+target-version = "py312"
+line-length = 100
+cache-dir = "checks/ruff"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP", "B"]
+ignore = ["E501"]

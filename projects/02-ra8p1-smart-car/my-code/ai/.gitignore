@@ -1,0 +1,19 @@
+_cache/
+.conda-voice/
+.gpu-train/
+dataset_tts/
+dataset_real/
+artifacts/
+__pycache__/
+*.pyc
+
+# 本机模型缓存、工具安装包与训练导出
+artifacts_real/
+kws_model_manifest.json
+debug_model_input/
+whisper-*/
+ruhmi_generated/_tools/
+ruhmi_generated/kws_current/_calibration*/
+ruhmi_generated/kws_current/_inputs/*
+!ruhmi_generated/kws_current/_inputs/labels.txt
+!ruhmi_generated/kws_current/_inputs/preprocess_config.json

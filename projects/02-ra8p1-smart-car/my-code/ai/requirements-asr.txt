@@ -1,0 +1,8 @@
+-r requirements.txt
+# 本地转写、音频读取与合成工具；实际生成语音仍需在线服务
+faster-whisper==1.2.1
+openvino==2026.1.0
+openvino-genai==2026.1.0.0
+librosa==0.11.0
+edge-tts==7.2.8
+imageio-ffmpeg==0.6.0

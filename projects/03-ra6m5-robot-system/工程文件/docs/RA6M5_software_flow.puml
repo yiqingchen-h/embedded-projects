@@ -1,0 +1,87 @@
+@startuml
+top to bottom direction
+
+skinparam backgroundColor #FFFFFF
+skinparam DefaultFontName SimSun
+skinparam DefaultFontSize 12
+skinparam ArrowFontName SimSun
+skinparam ArrowFontSize 12
+skinparam PackageFontName SimSun
+skinparam PackageFontSize 12
+skinparam RectangleFontName SimSun
+skinparam RectangleFontSize 12
+skinparam shadowing false
+skinparam packageStyle rectangle
+skinparam defaultTextAlignment center
+skinparam linetype ortho
+skinparam ArrowColor #63788d
+skinparam ArrowThickness 1.5
+skinparam RoundCorner 18
+skinparam PackageFontColor #18324d
+skinparam PackageBorderColor #3a5673
+skinparam PackageBackgroundColor #FFFFFF
+skinparam RectangleBorderColor #3a5673
+skinparam RectangleFontColor #18324d
+skinparam RectangleBackgroundColor #FFFFFF
+
+frame "上电初始化" as INIT #FFF7E6 {
+  rectangle "主入口\nmain() -> hal_entry() -> entry_init()" as ENTRY #FFFFFF
+  rectangle "系统初始化汇总\n缓冲 / 时基 / 串口 / LCD / 定时器\nADC / 按键 / 雷达 / EEPROM" as I1 #FFFFFF
+  rectangle "控制与参数装载\nPID 参数读取 / 机械臂初始化\nVisionUart9_Init() / RobotControl_Init()" as I2 #FFFFFF
+  rectangle "启动周期任务\ntimer_1ms_start()" as I3 #FFFFFF
+}
+
+rectangle "共享运行状态\ng_car_state / g_nav_target_speed / g_need_refresh" as STATE #F6F7FB
+
+frame "RA6M5 运行期软件平台" as PLATFORM #EEF5FF {
+  frame "主控任务框架" as CORE #EAF4FF {
+    rectangle "主循环慢任务\nwhile(1)\nRobotControl_MainLoopTask()" as MAIN_LOOP #FFFFFF
+    rectangle "GPT6 快任务\ngpt_timer6_callback()\nRobotControl_TimerTask_10ms()" as FAST_LOOP #FFFFFF
+  }
+
+  frame "核心处理模块" as PROC #FFF6FB {
+    rectangle "环境与视觉输入处理\nLidar_Process_Data()\nVisionUart9_Process()\nRobotControl_ProcessVisionInput()" as P1 #FFF8FB
+    rectangle "运动与机械臂目标更新\n目标速度 / 模式切换 / 抓放目标\nRobotControl_ProcessArmTarget()" as P2 #FFF8FB
+    rectangle "夹爪与菜单交互\nRobotControl_ProcessGripperRequest()\nKey_Scan() / Key_Get_Event()\nMenu_Key_Process() / Menu_Draw()" as P3 #EEF8EE
+  }
+
+  rectangle "基础节拍维护与电压标记\nKey_Tick_Handler()\nloop_cnt++ / voltage_mark_cnt++\nget_voltage_mark = true" as TICK #F6F7FB
+}
+
+frame "系统输出" as OUT #EDF8EE {
+  rectangle "底盘驱动输出\nPWM / TB6612" as O1 #FFFFFF
+  rectangle "转向舵机输出" as O2 #FFFFFF
+  rectangle "机械臂 / 夹爪动作" as O3 #FFFFFF
+  rectangle "LCD 菜单刷新" as O4 #FFFFFF
+}
+
+ENTRY -[hidden]right- I1
+I1 -[hidden]right- I2
+I2 -[hidden]right- I3
+I3 -[hidden]down- STATE
+STATE -[hidden]down- MAIN_LOOP
+MAIN_LOOP -[hidden]right- FAST_LOOP
+P1 -[hidden]right- P2
+P2 -[hidden]right- P3
+P3 -[hidden]down- TICK
+TICK -[hidden]down- O1
+O1 -[hidden]right- O2
+O2 -[hidden]right- O3
+O3 -[hidden]right- O4
+
+I3 --> STATE
+
+STATE ..> MAIN_LOOP : 共享状态
+STATE ..> FAST_LOOP : 控制状态
+I3 ..> FAST_LOOP : 启动 GPT6
+
+MAIN_LOOP --> P1
+P1 --> P2
+P2 --> P3
+FAST_LOOP --> TICK
+
+FAST_LOOP --> O1
+FAST_LOOP --> O2
+P3 --> O3
+P3 --> O4
+@enduml

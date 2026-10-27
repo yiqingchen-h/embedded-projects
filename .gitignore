@@ -1,0 +1,130 @@
+﻿# OS / editor
+.DS_Store
+Thumbs.db
+Desktop.ini
+*.tmp
+*.temp
+*.log
+*.bak
+*.orig
+*.swp
+*.swo
+.vscode/
+.idea/
+.claude/
+
+# Backup / cache
+backup/
+Backup/
+.cache/
+.pack/
+
+# Build outputs
+build/
+Build/
+out/
+Debug/
+Release/
+Listings/
+Objects/
+obj/
+bin/
+*.o
+*.obj
+*.d
+*.dep
+*.lst
+*.map
+*.axf
+*.elf
+*.hex
+*.bin
+*.lib
+*.a
+*.so
+*.dll
+*.exe
+
+# Keil / MDK
+*.uvguix.*
+*.uvoptx
+*.uvopt
+*.gpdsc
+*.sbr
+*.plg
+*.htm
+*.html
+*.lnp
+*.crf
+*.scvd
+JLinkLog.txt
+JLinkSettings.JLinkScript
+build_codex.log
+
+# STM32CubeIDE / Eclipse
+.settings/
+.metadata/
+*.launch
+*.ioc.backup
+
+# CCS / TI
+Debug__/
+Release__/
+*.ccsproject.user
+
+# Python
+__pycache__/
+*.pyc
+
+# Archives / generated packages
+*.zip
+*.rar
+*.7z
+*.tar
+*.gz
+
+# Sensitive files
+*.pem
+*.key
+*.crt
+.env
+.env.*
+
+
+# 本地助手、索引和调试资料
+.agents/
+.understand-anything/
+.eide/
+DebugConfig/
+tmp/
+*.code-workspace
+*.uvgui.*
+compile_commands.json
+*.pack
+
+# 本机配置、环境和私有样本
+.venv*/
+venv/
+pixel_clock_config.local.h
+
+# RA8P1 本地构建输出
+/projects/02-ra8p1-smart-car/build_output.txt
+
+# Keil 直接引用的模型部署源码；不放行其他构建产物
+!/projects/02-ra8p1-smart-car/my-code/ai/ruhmi_generated/kws_current/output/build/
+/projects/02-ra8p1-smart-car/my-code/ai/ruhmi_generated/kws_current/output/build/*
+!/projects/02-ra8p1-smart-car/my-code/ai/ruhmi_generated/kws_current/output/build/MCU/
+/projects/02-ra8p1-smart-car/my-code/ai/ruhmi_generated/kws_current/output/build/MCU/*
+!/projects/02-ra8p1-smart-car/my-code/ai/ruhmi_generated/kws_current/output/build/MCU/compilation/
+/projects/02-ra8p1-smart-car/my-code/ai/ruhmi_generated/kws_current/output/build/MCU/compilation/*
+!/projects/02-ra8p1-smart-car/my-code/ai/ruhmi_generated/kws_current/output/build/MCU/compilation/src/
+/projects/02-ra8p1-smart-car/my-code/ai/ruhmi_generated/kws_current/output/build/MCU/compilation/src/*
+!/projects/02-ra8p1-smart-car/my-code/ai/ruhmi_generated/kws_current/output/build/MCU/compilation/src/*.c
+!/projects/02-ra8p1-smart-car/my-code/ai/ruhmi_generated/kws_current/output/build/MCU/compilation/src/*.h
+
+# 倒立摆使用 VS Code Embedded IDE，保留其可移植工程入口
+!/projects/05-inverted-pendulum/工程文件/.eide/
+/projects/05-inverted-pendulum/工程文件/.eide/*
+!/projects/05-inverted-pendulum/工程文件/.eide/eide.json
+!/projects/05-inverted-pendulum/工程文件/.eide/files.options.yml
+!/projects/05-inverted-pendulum/工程文件/stm32_hel_DaoLiBai.code-workspace

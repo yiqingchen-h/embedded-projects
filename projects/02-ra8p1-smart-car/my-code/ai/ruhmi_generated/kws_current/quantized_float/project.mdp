@@ -1,0 +1,12 @@
+artifact_list:
+  MERAInterpreter:
+  - build\MERAInterpreter\model.mir
+  mera2_dcfg:
+  - build\MERAInterpreter\deploy_cfg.json
+  model:
+  - model\input_desc.json
+  quantizer:
+  - build\MERAInterpreter\model.mir
+  - build\MERAInterpreter\qtz_conf.json
+compile_flow: MERA_INTERPRETER
+prj_version: 1

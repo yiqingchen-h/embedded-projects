@@ -1,0 +1,8 @@
+# Python 3.11；已在本地环境核对的基础工具直接依赖
+numpy==2.4.6
+scipy==1.17.1
+scikit-learn==1.8.0
+joblib==1.5.3
+pyttsx3==2.99
+pywin32==311; sys_platform == "win32"
+pyserial==3.5
